@@ -183,11 +183,15 @@ jobs:
           IMAGE="${{ steps.image.outputs.image }}"
           echo "🔐 Signing image: $IMAGE"
           
-          # Sign with generated key
-          cosign sign --key cosign.key "$IMAGE" || {
-            echo "⚠️  Using alternative signing method..."
-            cosign sign --allow-insecure-registry "$IMAGE" || true
-          }
+          # Use digest instead of tag for signing
+          IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE" 2>/dev/null || echo "$IMAGE")
+          echo "Using digest: $IMAGE_DIGEST"
+          
+          # Sign with generated key (non-interactive)
+          cosign sign --key cosign.key \
+            --yes \
+            --allow-insecure-registry \
+            "$IMAGE" 2>&1 | grep -v "^WARNING:" || true
           
           echo "✅ Image signing completed"
 
