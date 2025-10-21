@@ -4,6 +4,14 @@ trigger:
       - main
       - master
 
+resources:
+  repositories:
+    - repository: self
+      type: github
+      name: Bluerate90/ServiceExample-DevOps
+      ref: main
+      trigger: true
+
 pool:
   vmImage: 'ubuntu-latest'
 
