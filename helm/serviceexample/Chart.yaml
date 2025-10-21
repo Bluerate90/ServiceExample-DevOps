@@ -2,8 +2,8 @@ apiVersion: v2
 name: serviceexample
 description: ServiceExample .NET application Helm chart
 type: application
-version: 1.0.0
-appVersion: "1.0.0"
+version: 1.0.2
+appVersion: "1.0.2"
 
 # These fields are important for ArtifactHub discovery
 home: https://github.com/Bluerate90/ServiceExample-DevOps
