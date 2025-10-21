@@ -151,9 +151,6 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
@@ -166,19 +163,47 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sign Docker image with Cosign
+      - name: Build image reference (lowercase)
+        id: image
+        run: |
+          IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "Image: $IMAGE"
+
+      - name: Sign Docker image with Cosign (Keyless)
         env:
           COSIGN_EXPERIMENTAL: 1
+          COSIGN_YES: true
         run: |
-          IMAGE_URL=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
-          echo "Signing image: $IMAGE_URL"
-          cosign sign --yes "$IMAGE_URL"
-          echo "Image signed successfully"
+          IMAGE="${{ steps.image.outputs.image }}"
+          echo "🔐 Signing image: $IMAGE"
+          
+          # Retry logic for TUF issues
+          for attempt in 1 2 3; do
+            echo "Attempt $attempt/3..."
+            if cosign sign "$IMAGE"; then
+              echo "✅ Image signed successfully"
+              exit 0
+            fi
+            if [ $attempt -lt 3 ]; then
+              echo "⏳ Retrying in 10 seconds..."
+              sleep 10
+            fi
+          done
+          
+          echo "❌ Signing failed after 3 attempts"
+          exit 1
 
       - name: Verify image signature
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
-          IMAGE_URL=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
-          echo "Verifying signature for: $IMAGE_URL"
-          cosign verify "$IMAGE_URL" || echo "Signature verification requires additional setup"
+          IMAGE="${{ steps.image.outputs.image }}"
+          echo "🔍 Verifying signature for: $IMAGE"
+          
+          if cosign verify "$IMAGE" --certificate-identity-regexp=".*" --certificate-oidc-issuer="https://token.actions.githubusercontent.com"; then
+            echo "✅ Signature verified successfully"
+          else
+            echo "❌ Signature verification failed"
+            exit 1
+          fi
