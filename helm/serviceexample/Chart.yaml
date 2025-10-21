@@ -1,0 +1,18 @@
+apiVersion: v2
+name: serviceexample
+description: A Helm chart for ServiceExample .NET application
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+home: https://github.com/YOUR_USERNAME/serviceexample-helm
+sources:
+  - https://github.com/YOUR_USERNAME/serviceexample-app
+maintainers:
+  - name: Your Name
+    email: your.email@example.com
+keywords:
+  - dotnet
+  - kubernetes
+  - mongodb
+  - redis
+  - nats

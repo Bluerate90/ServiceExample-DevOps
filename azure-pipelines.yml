@@ -1,0 +1,191 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  dockerRegistryServiceConnection: 'serviceexample-acr'
+  imageRepository: 'serviceexample'
+  containerRegistry: 'mycontainerregistry.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+  imageName: '$(containerRegistry)/$(imageRepository):$(tag)'
+
+stages:
+  # ============ STAGE 1: CODE SECURITY SCAN ============
+  - stage: SecurityScan_SAST
+    displayName: 'Security Scanning - SAST'
+    jobs:
+      - job: CodeAnalysis
+        displayName: 'Code Quality & Vulnerability Analysis'
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: '8.0.x'
+            displayName: 'Install .NET 8'
+
+          # SonarQube Analysis
+          - task: SonarCloudPrepare@1
+            inputs:
+              SonarCloud: 'SonarCloud'
+              organization: '$(SonarCloudOrg)'
+              scannerMode: 'MSBuild'
+              projectKey: 'serviceexample'
+              projectName: 'ServiceExample'
+            displayName: 'Setup SonarQube'
+            continueOnError: true
+
+          - script: dotnet restore
+            displayName: 'Restore NuGet Packages'
+
+          - task: SonarCloudAnalyze@1
+            displayName: 'Run SonarQube Analysis'
+            continueOnError: true
+
+          - task: SonarCloudPublish@1
+            inputs:
+              pollingTimeoutSec: '300'
+            displayName: 'Publish SonarQube Results'
+            continueOnError: true
+
+          # Dependency Check - for vulnerable packages
+          - script: |
+              wget https://github.com/dependency-check/dependency-check/releases/download/v8.4.0/dependency-check_8.4.0_all.deb
+              sudo apt-get install -y ./dependency-check_8.4.0_all.deb
+              dependency-check.sh --project "ServiceExample" --scan $(Build.SourcesDirectory) --format JSON --out $(Build.ArtifactStagingDirectory)
+            displayName: 'Run Dependency Check'
+            continueOnError: true
+
+          # Trivy - Filesystem scan
+          - script: |
+              wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+              echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+              sudo apt-get update
+              sudo apt-get install -y trivy
+              trivy fs --format json --output $(Build.ArtifactStagingDirectory)/trivy-fs.json $(Build.SourcesDirectory)
+            displayName: 'Run Trivy Filesystem Scan'
+            continueOnError: true
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: $(Build.ArtifactStagingDirectory)
+              artifactName: 'security-scan-reports'
+            displayName: 'Publish Security Reports'
+            condition: always()
+
+  # ============ STAGE 2: BUILD & TEST ============
+  - stage: BuildAndTest
+    displayName: 'Build & Test Application'
+    dependsOn: SecurityScan_SAST
+    condition: succeeded()
+    jobs:
+      - job: BuildJob
+        displayName: 'Build & Run Tests'
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: '8.0.x'
+            displayName: 'Install .NET 8'
+
+          - script: dotnet restore
+            displayName: 'Restore NuGet Packages'
+
+          - script: dotnet build --configuration $(buildConfiguration) --no-restore
+            displayName: 'Build Application'
+
+          - script: dotnet test --configuration $(buildConfiguration) --no-build --logger trx --collect:"XPlat Code Coverage"
+            displayName: 'Run Unit Tests'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'VSTest'
+              testResultsFiles: '**/TEST-*.trx'
+            displayName: 'Publish Test Results'
+            condition: always()
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+            displayName: 'Publish Code Coverage'
+            condition: always()
+
+  # ============ STAGE 3: BUILD DOCKER IMAGE ============
+  - stage: BuildDocker
+    displayName: 'Build Docker Image'
+    dependsOn: BuildAndTest
+    condition: succeeded()
+    jobs:
+      - job: DockerJob
+        displayName: 'Build & Push Docker Image'
+        steps:
+          - task: Docker@2
+            inputs:
+              command: 'build'
+              Dockerfile: '$(dockerfilePath)'
+              tags: |
+                $(imageName)
+                $(containerRegistry)/$(imageRepository):latest
+            displayName: 'Build Docker Image'
+
+          - task: Docker@2
+            inputs:
+              command: 'push'
+              repository: '$(imageRepository)'
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              tags: |
+                $(tag)
+                latest
+            displayName: 'Push to Azure Container Registry'
+
+  # ============ STAGE 4: SCAN DOCKER IMAGE ============
+  - stage: ScanContainer
+    displayName: 'Scan Docker Image'
+    dependsOn: BuildDocker
+    condition: succeeded()
+    jobs:
+      - job: ContainerScanJob
+        displayName: 'Scan Image for Vulnerabilities'
+        steps:
+          - script: |
+              wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+              echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+              sudo apt-get update
+              sudo apt-get install -y trivy
+              trivy image --format json --output $(Build.ArtifactStagingDirectory)/trivy-image.json $(imageName)
+              trivy image --severity HIGH,CRITICAL $(imageName)
+            displayName: 'Run Trivy Image Scan'
+            continueOnError: true
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: $(Build.ArtifactStagingDirectory)
+              artifactName: 'image-scan-reports'
+            displayName: 'Publish Image Scan Reports'
+            condition: always()
+
+  # ============ STAGE 5: SIGN IMAGE ============
+  - stage: SignImage
+    displayName: 'Sign Docker Image'
+    dependsOn: ScanContainer
+    condition: succeeded()
+    jobs:
+      - job: SignJob
+        displayName: 'Sign Image with Cosign'
+        steps:
+          - script: |
+              # Download Cosign
+              wget https://github.com/sigstore/cosign/releases/download/v2.0.0/cosign-linux-amd64
+              chmod +x cosign-linux-amd64
+              sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+              
+              # Login to ACR
+              az acr login --name mycontainerregistry
+              
+              # Note: You'll need to set up cosign keys in Azure Key Vault
+              # For now, this is a placeholder - configure in next section
+              echo "Image ready for signing: $(imageName)"
+            displayName: 'Prepare for Image Signing'
+            continueOnError: true

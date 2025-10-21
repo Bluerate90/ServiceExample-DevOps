@@ -1,0 +1,87 @@
+# Default values for serviceexample
+replicaCount: 3
+
+image:
+  repository: mycontainerregistry.azurecr.io/serviceexample
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+  targetPort: 5000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: serviceexample-tls
+      hosts:
+        - app.example.com
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - serviceexample
+          topologyKey: kubernetes.io/hostname
+
+# Environment variables
+env:
+  ASPNETCORE_ENVIRONMENT: Production
+  LOG_LEVEL: Information
+
+# Secret references
+secrets:
+  - name: MONGODB_URI
+    key: mongodb-uri
+  - name: REDIS_URL
+    key: redis-url
+  - name: NATS_URL
+    key: nats-url
+
+# MongoDB Integration
+mongodb:
+  enabled: false
+  # Configure if using Bitnami MongoDB chart as dependency
+
+# Redis Integration
+redis:
+  enabled: false
+  # Configure if using Bitnami Redis chart as dependency
