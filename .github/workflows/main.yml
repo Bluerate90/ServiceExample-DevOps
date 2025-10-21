@@ -12,7 +12,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/${{ github.event.repository.name }}
+  IMAGE_NAME: ${{ format('{0}/{1}', github.repository_owner, github.event.repository.name) }}
   DOTNET_VERSION: '9.0.x'
 
 jobs:
@@ -39,20 +39,6 @@ jobs:
       - name: Run unit tests
         run: dotnet test src/ServiceExample/ServiceExample/ServiceExample.csproj --configuration Release --no-build --logger trx --collect:"XPlat Code Coverage"
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: '**/TEST-*.trx'
-
-      - name: Upload code coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-coverage
-          path: '**/coverage.cobertura.xml'
-
   # ============ JOB 2: BUILD DOCKER IMAGE & PUSH ============
   build-and-push:
     name: Build & Push Docker Image
@@ -69,6 +55,13 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: Set lowercase image name
+        id: image
+        run: |
+          IMAGE_NAME=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
+          echo "image=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "Using image: $IMAGE_NAME"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -121,13 +114,13 @@ jobs:
       - name: Run Trivy vulnerability scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          image-ref: ${{ steps.image.outputs.image }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -135,7 +128,7 @@ jobs:
       - name: Run Trivy scan with table output
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          image-ref: ${{ steps.image.outputs.image }}
           format: 'table'
           severity: 'HIGH,CRITICAL'
 
@@ -170,7 +163,7 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
-          IMAGE_URL=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          IMAGE_URL=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
           echo "Signing image: $IMAGE_URL"
           cosign sign --yes "$IMAGE_URL"
           echo "Image signed successfully"
@@ -179,6 +172,6 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
-          IMAGE_URL=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          IMAGE_URL=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" | tr '[:upper:]' '[:lower:]')
           echo "Verifying signature for: $IMAGE_URL"
           cosign verify "$IMAGE_URL" || echo "Signature verification requires additional setup"
