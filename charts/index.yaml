@@ -1,0 +1,26 @@
+apiVersion: v1
+entries:
+  serviceexample:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-10-21T16:29:29.947504125-07:00"
+    description: ServiceExample .NET application Helm chart
+    digest: f9b0cce6f0fddaafd2a9e5699b337bd2d937e87087d469d4f454a8e5f1c66cf5
+    home: https://github.com/Bluerate90/ServiceExample-DevOps
+    icon: https://raw.githubusercontent.com/Bluerate90/ServiceExample-DevOps/main/helm/serviceexample/icon.png
+    keywords:
+    - dotnet
+    - kubernetes
+    - serviceexample
+    - aspnet-core
+    maintainers:
+    - email: tib9051@gmail.com
+      name: Tibyan Mustafa
+    name: serviceexample
+    sources:
+    - https://github.com/Bluerate90/ServiceExample-DevOps
+    type: application
+    urls:
+    - https://Bluerate90.github.io/ServiceExample-DevOps/charts/serviceexample-1.0.0.tgz
+    version: 1.0.0
+generated: "2025-10-21T16:29:29.94549513-07:00"
