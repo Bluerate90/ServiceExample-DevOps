@@ -29,3 +29,9 @@ spec:
               resources:
                 requests:
                   storage: 50Gi
+    grafana:
+      adminPassword: admin123
+      persistence:
+        enabled: true
+        storageClassName: longhorn
+        size: 10Gi
