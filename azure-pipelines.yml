@@ -39,18 +39,23 @@ stages:
           - script: |
               echo "Installing SonarScanner for .NET..."
               dotnet tool install --global dotnet-sonarscanner
+              echo "SonarScanner installed successfully"
+            displayName: 'Install SonarScanner'
+            continueOnError: true
+
+          - script: |
               echo "Starting SonarQube analysis..."
-              dotnet sonarscanner begin /k:"serviceexample" /o:"$(SonarCloudOrg)" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$(AZURE_DEVOPS_PAT)"
+              /root/.dotnet/tools/dotnet-sonarscanner begin /k:"serviceexample" /o:"$(SonarCloudOrg)" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$(AZURE_DEVOPS_PAT)"
             displayName: 'Setup SonarQube Scanner'
             continueOnError: true
 
           - script: dotnet build ServiceExample/ServiceExample/ServiceExample.csproj --configuration $(buildConfiguration) --no-restore
-            displayName: 'Build Application (with SonarQube)'
+            displayName: 'Build Application'
             continueOnError: true
 
           - script: |
               echo "Ending SonarQube analysis..."
-              dotnet sonarscanner end /d:sonar.login="$(AZURE_DEVOPS_PAT)"
+              /root/.dotnet/tools/dotnet-sonarscanner end /d:sonar.login="$(AZURE_DEVOPS_PAT)"
             displayName: 'Publish SonarQube Results'
             continueOnError: true
 
