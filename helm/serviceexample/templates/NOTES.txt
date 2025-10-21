@@ -1,0 +1,12 @@
+# helm/serviceexample/templates/NOTES.txt
+1. Get the application URL by running these commands:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ .Chart.Name }} 5000:5000
+
+2. Then visit: http://localhost:5000
+
+3. Check the status:
+  kubectl get deployment {{ .Chart.Name }} -n {{ .Release.Namespace }}
+  kubectl logs -n {{ .Release.Namespace }} -l app={{ .Chart.Name }} -f
+
+4. Access stored values:
+  kubectl get secret app-secrets -n {{ .Release.Namespace }} -o jsonpath='{.data}'

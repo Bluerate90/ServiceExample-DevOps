@@ -1,7 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
-  "title": "ServiceExample Helm Chart Values",
   "type": "object",
+  "title": "ServiceExample Helm Chart Values",
+  "description": "Configuration values for ServiceExample .NET application",
   "properties": {
     "replicaCount": {
       "type": "integer",
@@ -10,67 +11,203 @@
       "maximum": 10,
       "default": 3
     },
+    
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name",
+      "default": ""
+    },
     "image": {
       "type": "object",
       "description": "Docker image configuration",
       "properties": {
         "repository": {
           "type": "string",
-          "description": "Image repository URL"
+          "description": "Docker image repository",
+          "default": "serviceexample"
         },
         "pullPolicy": {
           "type": "string",
+          "description": "Image pull policy",
           "enum": ["IfNotPresent", "Always", "Never"],
           "default": "IfNotPresent"
         },
         "tag": {
           "type": "string",
-          "description": "Image tag"
+          "description": "Docker image tag",
+          "default": "latest"
         }
       },
-      "required": ["repository"]
+      "required": ["repository"],
+      "additionalProperties": false
     },
     "service": {
       "type": "object",
+      "description": "Kubernetes Service configuration",
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["ClusterIP", "NodePort", "LoadBalancer"]
+          "description": "Service type",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
+          "default": "ClusterIP"
         },
         "port": {
           "type": "integer",
+          "description": "Service port",
           "minimum": 1,
-          "maximum": 65535
+          "maximum": 65535,
+          "default": 9080
+        },
+        "targetPort": {
+          "type": "integer",
+          "description": "Container target port",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 9080
         }
-      }
+      },
+      "required": ["port", "targetPort"],
+      "additionalProperties": false
     },
     "resources": {
       "type": "object",
+      "description": "CPU and memory resources",
       "properties": {
-        "limits": {
-          "type": "object",
-          "properties": {
-            "cpu": {"type": "string"},
-            "memory": {"type": "string"}
-          }
-        },
         "requests": {
           "type": "object",
           "properties": {
-            "cpu": {"type": "string"},
-            "memory": {"type": "string"}
+            "cpu": {
+              "type": "string",
+              "description": "CPU request (e.g., 250m)",
+              "default": "250m"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Memory request (e.g., 256Mi)",
+              "default": "256Mi"
+            }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "description": "CPU limit (e.g., 500m)",
+              "default": "500m"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Memory limit (e.g., 512Mi)",
+              "default": "512Mi"
+            }
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "autoscaling": {
       "type": "object",
+      "description": "Horizontal Pod Autoscaler configuration",
       "properties": {
-        "enabled": {"type": "boolean"},
-        "minReplicas": {"type": "integer", "minimum": 1},
-        "maxReplicas": {"type": "integer", "minimum": 1}
-      }
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable autoscaling",
+          "default": true
+        },
+        "minReplicas": {
+          "type": "integer",
+          "description": "Minimum replicas",
+          "minimum": 1,
+          "default": 3
+        },
+        "maxReplicas": {
+          "type": "integer",
+          "description": "Maximum replicas",
+          "minimum": 1,
+          "default": 10
+        },
+        "targetCPUUtilizationPercentage": {
+          "type": "integer",
+          "description": "Target CPU utilization percentage",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 70
+        }
+      },
+      "additionalProperties": false
+    },
+    "env": {
+      "type": "object",
+      "description": "Environment variables for the application",
+      "properties": {
+        "ASPNETCORE_ENVIRONMENT": {
+          "type": "string",
+          "description": ".NET Core environment (Production/Development/Staging)",
+          "enum": ["Production", "Development", "Staging"],
+          "default": "Production"
+        },
+        "LOG_LEVEL": {
+          "type": "string",
+          "description": "Application log level",
+          "enum": ["Debug", "Information", "Warning", "Error"],
+          "default": "Information"
+        }
+      },
+      "additionalProperties": true
+    },
+    "healthcheck": {
+      "type": "object",
+      "description": "Health check configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "liveness": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "initialDelaySeconds": {"type": "integer"},
+            "periodSeconds": {"type": "integer"}
+          }
+        },
+        "readiness": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "initialDelaySeconds": {"type": "integer"},
+            "periodSeconds": {"type": "integer"}
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "mongodb": {
+      "type": "object",
+      "description": "MongoDB configuration (optional)",
+      "properties": {
+        "enabled": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "redis": {
+      "type": "object",
+      "description": "Redis configuration (optional)",
+      "properties": {
+        "enabled": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "nats": {
+      "type": "object",
+      "description": "NATS configuration (optional)",
+      "properties": {
+        "enabled": {"type": "boolean"}
+      },
+      "additionalProperties": true
     }
   },
-  "required": ["replicaCount", "image", "service"]
+  "required": ["replicaCount", "image", "service", "resources", "autoscaling"],
+  "additionalProperties": true
 }

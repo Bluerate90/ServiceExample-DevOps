@@ -1,65 +1,48 @@
+# helm/serviceexample/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "serviceexample.fullname" . }}
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "serviceexample.labels" . | nindent 4 }}
+    app: {{ .Chart.Name }}
+    version: {{ .Chart.AppVersion }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
-      {{- include "serviceexample.selectorLabels" . | nindent 6 }}
+      app: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        {{- include "serviceexample.selectorLabels" . | nindent 8 }}
+        app: {{ .Chart.Name }}
+        version: {{ .Chart.AppVersion }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "serviceexample.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
       - name: {{ .Chart.Name }}
-        securityContext:
-          {{- toYaml .Values.securityContext | nindent 12 }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - name: http
-          containerPort: {{ .Values.service.targetPort }}
-          protocol: TCP
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: http
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          initialDelaySeconds: 10
-          periodSeconds: 5
+        - containerPort: {{ .Values.service.targetPort }}
+          name: http
         env:
         {{- range $key, $value := .Values.env }}
         - name: {{ $key }}
-          value: {{ $value | quote }}
-        {{- end }}
-        {{- range .Values.secrets }}
-        - name: {{ .name }}
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "serviceexample.fullname" . }}-secrets
-              key: {{ .key }}
+          value: "{{ $value }}"
         {{- end }}
         resources:
-          {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- if .Values.healthcheck.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.healthcheck.liveness.path }}
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: {{ .Values.healthcheck.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthcheck.liveness.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.healthcheck.readiness.path }}
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: {{ .Values.healthcheck.readiness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthcheck.readiness.periodSeconds }}
+        {{- end }}
