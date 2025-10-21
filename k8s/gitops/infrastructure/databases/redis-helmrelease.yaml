@@ -1,0 +1,26 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: redis
+  namespace: databases
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: redis
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+      version: ">=17.0.0"
+  values:
+    architecture: replication
+    replica:
+      replicaCount: 3
+    auth:
+      enabled: true
+      password: redispassword
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      size: 10Gi

@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: longhorn
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+        namespace: flux-system
+      version: ">=1.5.0"
+  install:
+    crds: Create
+  upgrade:
+    crds: Create
+  values:
+    persistence:
+      defaultClass: true
+      defaultClassReplicaCount: 2

@@ -21,7 +21,7 @@ helm install sealed-secrets sealed-secrets/sealed-secrets \
   --wait
 
 log_success "Waiting for Sealed Secrets to be ready..."
-kubectl rollout status deployment/sealed-secrets-sealed-secrets -n kube-system --timeout=300s
+kubectl rollout status deployment/sealed-secrets -n kube-system --timeout=300s
 
 # Step 3: Create application secret
 log_info "Creating application secrets..."
@@ -40,10 +40,13 @@ EOF
 
 # Step 4: Seal the secret
 log_info "Sealing secret..."
-kubeseal -f /tmp/app-secret.yaml -w k8s/gitops/apps/serviceexample/sealed-secret.yaml
+kubeseal -f /tmp/app-secret.yaml -w ../k8s/gitops/apps/serviceexample/sealed-secret.yaml \
+  --controller-name=sealed-secrets \
+  --controller-namespace=kube-system \
+  --format yaml
 
 log_success "========== SEALED SECRETS SETUP COMPLETE =========="
 
 # Display sealed secret
-log_info "Sealed secret created at: k8s/gitops/apps/serviceexample/sealed-secret.yaml"
+log_info "Sealed secret created at: ../k8s/gitops/apps/serviceexample/sealed-secret.yaml"
 log_info "Commit and push to GitHub for FluxCD to deploy"

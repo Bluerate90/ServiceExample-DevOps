@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: serviceexample
+  namespace: default
+spec:
+  interval: 30s
+  chart:
+    spec:
+      chart: serviceexample
+      sourceRef:
+        kind: HelmRepository
+        name: serviceexample-local
+        namespace: flux-system
+      version: "1.0.0"
+  install:
+    crds: Create
+  upgrade:
+    crds: Create
+  values:
+    replicaCount: 3
+    image:
+      repository: mycontainerregistry.azurecr.io/serviceexample
+      tag: "latest"
+    
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+      LOG_LEVEL: Information
