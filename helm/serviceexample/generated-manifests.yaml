@@ -27,7 +27,7 @@ metadata:
   namespace: default
   labels:
     app: serviceexample
-    version: 1.0.2
+    version: 1.0.0
 spec:
   replicas: 3
   selector:
@@ -37,7 +37,7 @@ spec:
     metadata:
       labels:
         app: serviceexample
-        version: 1.0.2
+        version: 1.0.0
     spec:
       containers:
       - name: serviceexample

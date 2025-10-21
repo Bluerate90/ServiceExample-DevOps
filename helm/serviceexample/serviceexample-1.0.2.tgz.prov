@@ -2,7 +2,7 @@
 Hash: SHA512
 
 apiVersion: v2
-appVersion: 1.0.2
+appVersion: 1.0.0
 description: ServiceExample .NET application Helm chart
 home: https://github.com/Bluerate90/ServiceExample-DevOps
 icon: https://raw.githubusercontent.com/Bluerate90/ServiceExample-DevOps/main/helm/serviceexample/icon.png
@@ -18,11 +18,11 @@ name: serviceexample
 sources:
 - - https://github.com/Bluerate90/ServiceExample-DevOps
 type: application
-version: 1.0.2
+version: 1.0.0
 
 ...
 files:
-  serviceexample-1.0.2.tgz: sha256:e47d1bc3784a8e97fdd33038d735347550fa81ee86cfc8a63cce10cbc7f8853e
+  serviceexample-1.0.0.tgz: sha256:e47d1bc3784a8e97fdd33038d735347550fa81ee86cfc8a63cce10cbc7f8853e
 -----BEGIN PGP SIGNATURE-----
 
 wsFcBAEBCgAQBQJo+BFsCRDYsUj1bEyq8wAAP64QABQ1CKnK1tSfyJZJZ50emc3t

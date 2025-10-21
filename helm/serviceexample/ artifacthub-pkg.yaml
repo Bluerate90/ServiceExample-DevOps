@@ -1,7 +1,7 @@
 # helm/serviceexample/artifacthub-pkg.yaml
 apiVersion: v1
 name: serviceexample
-version: 1.0.2
+version: 1.0.0
 displayName: ServiceExample
 description: |
   ServiceExample is a .NET Core REST API application deployed via Helm chart.
@@ -37,7 +37,7 @@ provider:
 install: |
   ## Install the Chart
 ```bash
-  helm repo add serviceexample https://github.com/Bluerate90/ServiceExample-DevOps/releases/download/v1.0.2
+  helm repo add serviceexample https://github.com/Bluerate90/ServiceExample-DevOps/releases/download/v1.0.0
   helm install my-release serviceexample/serviceexample
 ```
   
@@ -59,7 +59,7 @@ usage: |
 ```bash
   helm install my-release serviceexample/serviceexample \
     --set replicaCount=5 \
-    --set image.tag=v1.0.2
+    --set image.tag=v1.0.0
 ```
   
   See values.schema.json for all available options.
