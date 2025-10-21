@@ -31,13 +31,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore NuGet packages
-        run: dotnet restore ServiceExample/ServiceExample/ServiceExample.csproj
+        run: dotnet restore ServiceExample-DevOps/src/ServiceExample/ServiceExample.csproj
 
       - name: Build application
-        run: dotnet build ServiceExample/ServiceExample/ServiceExample.csproj --configuration Release --no-restore
+        run: dotnet build ServiceExample-DevOps/src/ServiceExample/ServiceExample.csproj --configuration Release --no-restore
 
       - name: Run unit tests
-        run: dotnet test ServiceExample/ServiceExample/ServiceExample.csproj --configuration Release --no-build --logger trx --collect:"XPlat Code Coverage"
+        run: dotnet test ServiceExample-DevOps/src/ServiceExample/ServiceExample.csproj --configuration Release --no-build --logger trx --collect:"XPlat Code Coverage"
 
       - name: Upload test results
         if: always()
