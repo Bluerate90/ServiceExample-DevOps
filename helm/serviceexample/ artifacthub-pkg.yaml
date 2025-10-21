@@ -1,0 +1,76 @@
+# helm/serviceexample/artifacthub-pkg.yaml
+apiVersion: v1
+name: serviceexample
+version: 1.0.0
+displayName: ServiceExample
+description: |
+  ServiceExample is a .NET Core REST API application deployed via Helm chart.
+  
+  Features:
+  - RESTful API with Swagger/OpenAPI documentation
+  - Kubernetes-ready with deployment and service templates
+  - Horizontal Pod Autoscaler (HPA) for auto-scaling
+  - Health checks (liveness and readiness probes)
+  - Configurable via values.yaml with JSON schema validation
+  
+  Access the API at: http://localhost:9080/api/Person
+  View documentation at: http://localhost:9080/swagger/index.html
+
+keywords:
+  - dotnet
+  - kubernetes
+  - api
+  - aspnet-core
+
+home: https://github.com/YOUR_USERNAME/ServiceExample-DevOps
+icon: https://raw.githubusercontent.com/YOUR_USERNAME/ServiceExample-DevOps/main/helm/serviceexample/icon.png
+sources:
+  - https://github.com/YOUR_USERNAME/ServiceExample-DevOps
+
+maintainers:
+  - name: Tibyan Mustafa
+    email: tib9051@gmail.com
+
+provider:
+  name: Community
+
+install: |
+  ## Install the Chart
+```bash
+  helm repo add serviceexample https://github.com/YOUR_USERNAME/ServiceExample-DevOps/releases/download/v1.0.0
+  helm install my-release serviceexample/serviceexample
+```
+  
+  ## Access the Application
+  
+  Port-forward to access locally:
+```bash
+  kubectl port-forward svc/serviceexample 9080:9080
+```
+  
+  Then visit:
+  - Swagger UI: http://localhost:9080/swagger/index.html
+  - API: http://localhost:9080/api/Person
+
+usage: |
+  ## Configuration
+  
+  Customize the deployment by providing values:
+```bash
+  helm install my-release serviceexample/serviceexample \
+    --set replicaCount=5 \
+    --set image.tag=v1.0.1
+```
+  
+  See values.schema.json for all available options.
+
+tips:
+  - Use values.schema.json for configuration validation
+  - Chart is GPG signed for security verification
+  - Includes HPA for automatic scaling based on CPU usage
+
+links:
+  - name: GitHub Repository
+    url: https://github.com/YOUR_USERNAME/ServiceExample-DevOps
+  - name: Issues
+    url: https://github.com/YOUR_USERNAME/ServiceExample-DevOps/issues

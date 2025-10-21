@@ -1,0 +1,96 @@
+---
+# Source: serviceexample/templates/service.yaml
+# helm/serviceexample/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: serviceexample
+  namespace: default
+  labels:
+    app: serviceexample
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9080
+      targetPort: 9080
+      protocol: TCP
+      name: http
+  selector:
+    app: serviceexample
+---
+# Source: serviceexample/templates/deployment.yaml
+# helm/serviceexample/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serviceexample
+  namespace: default
+  labels:
+    app: serviceexample
+    version: 1.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: serviceexample
+  template:
+    metadata:
+      labels:
+        app: serviceexample
+        version: 1.0.0
+    spec:
+      containers:
+      - name: serviceexample
+        image: "serviceexample:latest"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+          name: http
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: ASPNETCORE_URLS
+          value: "http://+:9080"
+        - name: LOG_LEVEL
+          value: "Information"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 9080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+# Source: serviceexample/templates/hpa.yaml
+# helm/serviceexample/templates/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: serviceexample
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: serviceexample
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
