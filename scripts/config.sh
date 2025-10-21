@@ -1,25 +1,21 @@
 #!/bin/bash
-# Shared configuration for all scripts
 
+# Shared configuration for all scripts
 # ============ CLUSTER CONFIGURATION ============
 CLUSTER_NAME="serviceexample-cluster"
 K8S_VERSION="1.28"
 
 # ============ VM CONFIGURATION ============
 declare -A NODES=(
-    [master-01]="10.0.1.10"
-    [master-02]="10.0.1.11"
-    [master-03]="10.0.1.12"
-    [worker-01]="10.0.1.20"
-    [worker-02]="10.0.1.21"
+    [master-01]="192.168.43.10"
 )
 
-CONTROL_PLANE_ENDPOINT="10.0.1.10:6443"
+CONTROL_PLANE_ENDPOINT="192.168.43.10:6443"
 POD_CIDR="10.244.0.0/16"
 SERVICE_CIDR="10.96.0.0/12"
 DNS_SERVERS="8.8.8.8,8.8.4.4"
-GATEWAY="10.0.1.1"
-SUBNET="10.0.1.0/24"
+GATEWAY="192.168.43.1"
+SUBNET="192.168.43.0/24"
 
 # ============ CONTAINER REGISTRY ============
 REGISTRY_NAME="mycontainerregistry"
