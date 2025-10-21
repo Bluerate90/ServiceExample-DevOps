@@ -1,0 +1,26 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+  redis:
+    image: redis:latest
+    container_name: redis
+  nats:
+    image: nats:latest
+    container_name: nats
+  app:
+    build:
+      context: .
+      dockerfile: ServiceExample/Dockerfile
+    container_name: myapp
+    depends_on:
+      - nats
+      - mongo
+      - redis
+    ports:
+      - "9080:9080"
+    environment:
+      Aspire__MongoDB__Driver__ConnectionString: mongodb://mongo:27017
+      Aspire__StackExchange__Redis__ConnectionString: redis:6379
+      Aspire__NATS__Net__ConnectionString: nats://nats:4222 
+      

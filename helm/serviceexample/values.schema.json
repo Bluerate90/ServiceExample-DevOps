@@ -54,6 +54,7 @@
         "port": {
           "type": "integer",
           "description": "Service port",
+<<<<<<< HEAD
           "minimum": 1,
           "maximum": 65535,
           "default": 9080
@@ -64,6 +65,18 @@
           "minimum": 1,
           "maximum": 65535,
           "default": 9080
+=======
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 9080
+        },
+        "targetPort": {
+          "type": "integer",
+          "description": "Container target port",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 9080
+>>>>>>> e75ee6b87273393ec52a7ea2e21db35de8e8bd64
         }
       },
       "required": ["port", "targetPort"],
@@ -159,6 +172,7 @@
     "healthcheck": {
       "type": "object",
       "description": "Health check configuration",
+<<<<<<< HEAD
       "properties": {
         "enabled": {
           "type": "boolean",
@@ -196,6 +210,69 @@
       "description": "Redis configuration (optional)",
       "properties": {
         "enabled": {"type": "boolean"}
+=======
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "liveness": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "default": "/health"
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "default": 15
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        },
+        "readiness": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "default": "/ready"
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "default": 10
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "default": 5
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "mongodb": {
+      "type": "object",
+      "description": "MongoDB configuration (optional)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "redis": {
+      "type": "object",
+      "description": "Redis configuration (optional)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        }
+>>>>>>> e75ee6b87273393ec52a7ea2e21db35de8e8bd64
       },
       "additionalProperties": true
     },
@@ -203,7 +280,14 @@
       "type": "object",
       "description": "NATS configuration (optional)",
       "properties": {
+<<<<<<< HEAD
         "enabled": {"type": "boolean"}
+=======
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        }
+>>>>>>> e75ee6b87273393ec52a7ea2e21db35de8e8bd64
       },
       "additionalProperties": true
     }
