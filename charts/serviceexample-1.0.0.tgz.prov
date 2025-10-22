@@ -1,0 +1,40 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+apiVersion: v2
+appVersion: 1.0.0
+description: ServiceExample .NET application Helm chart
+home: https://github.com/Bluerate90/ServiceExample-DevOps
+keywords:
+- - dotnet
+- - kubernetes
+- - serviceexample
+- - aspnet-core
+maintainers:
+- - email: tib9051@gmail.com
+  name: Tibyan Mustafa
+name: serviceexample
+sources:
+- - https://github.com/Bluerate90/ServiceExample-DevOps
+type: application
+version: 1.0.0
+
+...
+files:
+  serviceexample-1.0.0.tgz: sha256:4c411c1d0e5242390865221d96c830ae64221c6c61bdfd4e28143aaced740f51
+-----BEGIN PGP SIGNATURE-----
+
+wsFcBAEBCgAQBQJo+CHtCRDYsUj1bEyq8wAArXUQAKaqn5WEaIdOZFDJMg2rJCq0
+ArzV9Es5grkypYwq3tl657F9yCaU3TTMCuGr5StcuB5bSlvay2chw9LDx/vMjUeh
+UkHFZWd0ae5zGbItuU2NhuqEli9vcNPNs14Lqo9AwQNPP2Rh51Sk99nm3oWJc4zV
+HaZXHKH2qDidbGG+8dk8qt0DjheOJPbvV0nXm3FhpC+fDcmnrUFKa44mfm32peId
+gPQiz3qlx6Gr/gY4uSt60vYRSJNBCtYbfoL100IKzRghLXrYE+qEmoTZ3yoIXP+T
+Awy2JjjWP4AQPgQaU7CVJFn7KSNswnUluDydUhXHjOztj+QQcF0zfdvosIjhiy3W
+uP9l9W0udRvBCnF0nvXdtWcRuqwqHo6vtk5n8pClatKi6gjDQy73E2GoEYuLpP6m
+fOnSd/VA9Hj9RHdbisxfkBbaRudAIO5uZds4McY15y8Z/VuA0GTNxlJam7SyITnH
+a3pAhN3px1XrbHGoIzJ68NpVNRRq8Z03b95X50uGneTASGX3Kp7NMnzlqUkgC3tP
+96Z0OF65R/Tpg6gRCFgEFbFhuZcEpHXnpkJr+aKEZSZydeuO7xGTTFmUeRGgJHQU
+VPNi+7dMc0civo2jH0DS0iUaFYetrQLm26DSW/Buw7zAggS2px7a3ARI7EeTnfC4
+HwHDIP2xw0OjT8VQ2KGI
+=OTiG
+-----END PGP SIGNATURE-----
