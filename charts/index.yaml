@@ -3,7 +3,7 @@ entries:
   serviceexample:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-21T17:18:08.327134268-07:00"
+    created: "2025-10-21T18:42:47.905295969-07:00"
     description: ServiceExample .NET application Helm chart
     digest: 4c411c1d0e5242390865221d96c830ae64221c6c61bdfd4e28143aaced740f51
     home: https://github.com/Bluerate90/ServiceExample-DevOps
@@ -22,4 +22,4 @@ entries:
     urls:
     - https://Bluerate90.github.io/ServiceExample-DevOps/charts/serviceexample-1.0.0.tgz
     version: 1.0.0
-generated: "2025-10-21T17:18:08.323623028-07:00"
+generated: "2025-10-21T18:42:47.902478385-07:00"
