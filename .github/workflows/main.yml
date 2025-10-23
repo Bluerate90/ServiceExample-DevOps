@@ -72,13 +72,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore src/ServiceExample/ServiceExample.sln
 
       - name: Build application
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build src/ServiceExample/ServiceExample.sln --configuration Release --no-restore
 
       - name: Run unit tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test src/ServiceExample/ServiceExample.sln --configuration Release --no-build --verbosity normal
 
   # ==================== BUILD & SCAN JOB ====================
   build-and-scan:
