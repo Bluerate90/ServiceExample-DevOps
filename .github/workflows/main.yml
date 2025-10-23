@@ -146,6 +146,7 @@ jobs:
           severity: 'CRITICAL,HIGH,MEDIUM'
 
       - name: Push Docker image
+        id: push
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -159,16 +160,17 @@ jobs:
         with:
           cosign-release: 'v2.2.0'
 
-      - name: Sign Docker image with Cosign
+      - name: Sign Docker image with Cosign (by digest)
         run: |
           echo "${{ secrets.COSIGN_KEY }}" | base64 -d > cosign.key
-          cosign sign --key cosign.key ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          # Sign using digest instead of tag
+          cosign sign --key cosign.key "${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}"
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
 
       - name: Verify image signature
         run: |
-          cosign verify --key cosign.pub ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cosign verify --key cosign.pub "${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}"
 
       - name: Create deployment summary
         run: |
