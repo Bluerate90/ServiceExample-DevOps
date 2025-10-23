@@ -1,0 +1,17 @@
+# Environment - NEVER COMMIT
+.env
+.env.local
+.env.*.local
+
+# Secrets - NEVER COMMIT
+cosign.key
+*.key
+*.pem
+
+# Build artifacts
+bin/
+obj/
+dist/
+
+# Docker
+docker-compose.override.yml
