@@ -29,40 +29,43 @@ ServiceExample-DevOps/
 │
 ├── 📁 src/                                   # Application source
 │   └── ServiceExample/
-│       ├── ServiceExample/                   # Main .NET app
-│       │   ├── Program.cs                    # Entry point
-│       │   ├── appsettings.json              # Config
-│       │   ├── ServiceExample.csproj         # Project file
+│       ├── 📄 ServiceExample.sln              # Solution file
+│       ├── 📄 README.md                       # App documentation
+│       ├── 📄 docker-image-build.bat          # Windows build script
+│       ├── 📄 docker_compose.yaml             # Dev compose config
+│       │
+│       ├── ServiceExample/                    # Main .NET app
+│       │   ├── Program.cs                     # Entry point
+│       │   ├── ServiceExample.csproj          # Project file
+│       │   ├── ServiceExample.http            # HTTP test file
+│       │   ├── Dockerfile                     # App container
+│       │   ├── appsettings.json               # Production config
+│       │   ├── appsettings.Development.json   # Dev config
 │       │   ├── Controllers/
-│       │   │   └── PersonController.cs       # API endpoints
+│       │   │   └── PersonController.cs        # API endpoints
 │       │   ├── Models/
-│       │   │   └── Person.cs                 # Data model
-│       │   ├── Services/
-│       │   │   ├── Sender.cs                 # NATS sender
-│       │   │   └── Receiver.cs               # NATS receiver
+│       │   │   └── Person.cs                  # Data model
 │       │   ├── Repository/
-│       │   │   └── PersonContext.cs          # MongoDB context
-│       │   └── Dockerfile
+│       │   │   └── PersonContext.cs           # MongoDB context
+│       │   ├── Services/
+│       │   │   ├── Sender.cs                  # NATS sender
+│       │   │   └── Receiver.cs                # NATS receiver
+│       │   └── Properties/
+│       │       └── launchSettings.json        # Launch config
 │       │
 │       ├── UnitTests/
 │       │   ├── UnitTests.csproj
 │       │   └── UnitTests.cs
 │       │
-│       ├── docker/
-│       │   ├── docker-compose.yml            # Local dev compose
-│       │   ├── Dockerfile
-│       │   └── certs/                        # TLS certificates
-│       │       ├── mongodb.pem
-│       │       ├── nats-cert.pem
-│       │       ├── nats-key.pem
-│       │       ├── redis-cert.pem
-│       │       └── redis-key.pem
-│       │
-│       └── ServiceExample.sln
-│
-├── 📁 docker/                                # Docker configs
-│   ├── Dockerfile                            # Production image
-│   └── docker-compose.yml                    # Local stack
+│       └── docker/
+│           ├── Dockerfile                     # Service container
+│           ├── docker-compose.yml             # Docker compose
+│           └── certs/                         # TLS certificates
+│               ├── mongodb.pem
+│               ├── nats-cert.pem
+│               ├── nats-key.pem
+│               ├── redis-cert.pem
+│               └── redis-key.pem
 │
 ├── 📁 helm/                                  # Helm charts
 │   └── serviceexample/
@@ -101,12 +104,25 @@ ServiceExample-DevOps/
 │
 ├── 📁 .github/                               # GitHub Actions workflows
 │   └── workflows/
-│       ├── ci-cd.yml                         # Build, sign, publish
-│       └── helm-chart.yml                    # Chart signing & publish
+│       └── main.yaml                         # Build, test, sign, publish
+│
+├── 📁 scripts/                               # Automation & setup scripts
+│   ├── 01-prepare-nodes.sh                   # Prepare cluster nodes
+│   ├── 02-init-master-1.sh                   # Initialize master node
+│   ├── 03-join-masters.sh                    # Join additional masters
+│   ├── 04-join-workers.sh                    # Join worker nodes
+│   ├── 05-install-longhorn.sh                # Install storage
+│   ├── 06-install-observability.sh           # Install monitoring stack
+│   ├── 07-install-flux.sh                    # Install FluxCD GitOps
+│   ├── 08-setup-sealed-secrets.sh            # Setup secret encryption
+│   ├── 09-sign-image.sh                      # Sign Docker images
+│   ├── 10-sign-helm-chart.sh                 # Sign Helm charts
+│   ├── config.sh                             # Configuration variables
+│   ├── fix-k8s-repo.sh                       # Fix Kubernetes repo
+│   └── verify-deployment.sh                  # Verify deployment status
 │
 ├── 📁 docs/                                  # Documentation
 │   ├── Access App - Guide.md                 # ⭐ Quick access guide
-│   ├── Security Best Practices & Implementation Guide.md
 │   ├── Local Development Setup.md            # Local running
 │   ├── Step2: CI-CD Pipeline.md              # CI/CD setup
 │   ├── Helm Chart.md                         # Packaging & publish
@@ -128,18 +144,24 @@ ServiceExample-DevOps/
 - `docs/Access App - Guide.md` - Quick access guide
 - `docker/docker-compose.yml` - Local development
 
+**Cluster Setup (Automated)**
+- `scripts/` - Automation scripts for K8s cluster setup
+- `scripts/config.sh` - Configuration variables for all scripts
+
 **Deployment**
 - `helm/serviceexample/` - Package for K8s
 - `k8s/gitops/` - GitOps automation
 
 **CI/CD**
-- `.github/workflows/` - GitHub Actions pipelines
+- `.github/workflows/main.yaml` - GitHub Actions pipeline
 - `azure-pipelines.yml` - Azure DevOps pipeline (alternative)
-- `cosign.pub` - Public key for image verification
+- `scripts/09-sign-image.sh` - Sign Docker images
+- `scripts/10-sign-helm-chart.sh` - Sign Helm charts
 
 **Security**
 - `k8s/gitops/apps/sealed-secret.yaml` - Encrypted secrets
 - `src/docker/certs/` - TLS certificates
+- `scripts/08-setup-sealed-secrets.sh` - Setup sealed secrets
 
 ---
 
@@ -150,7 +172,7 @@ ServiceExample-DevOps/
 Start the application with all dependencies using Docker Compose:
 
 ```bash
-cd docker
+cd src/ServiceExample
 docker-compose up -d
 ```
 
@@ -174,7 +196,7 @@ dotnet test UnitTests/UnitTests.csproj
 ### Build Docker Image Locally
 
 ```bash
-cd docker
+cd src/ServiceExample/docker
 docker build -t serviceexample:latest .
 ```
 
@@ -352,4 +374,4 @@ For detailed setup instructions, refer to the documentation in the `docs/` folde
 
 ---
 
-**DevOps Components**: Docker, Kubernetes, Helm, FluxCD, Prometheus, Grafana, Loki, Longhorn, GitHub Actions, Azure DevOps
+**DevOps Components**: Docker, Kubernetes, Helm, FluxCD, Prometheus, Grafana, Loki, Longhorn, GitHub Actions, Azure DevOps, Bash Scripts
