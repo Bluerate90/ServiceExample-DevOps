@@ -269,12 +269,6 @@ GitOps automatically deploys updates from the repository. See **GitOps Setup** d
 | **RBAC** | Kubernetes native | Helm chart templates | ✅ Implemented |
 | **CI/CD Security** | GitHub Actions secrets | `.github/workflows/` | ✅ Best practices |
 
-**⚠️ Important**: See `docs/Security Best Practices & Implementation Guide.md` for:
-- How to properly store private keys (GitHub Secrets, not repository)
-- Why `cosign.pub` is safe to commit
-- How to implement signing in CI/CD
-- Security verification checklist
-
 ---
 
 ## 📊 Monitoring & Observability
