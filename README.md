@@ -368,7 +368,7 @@ Alternative CI/CD configuration. Can be used instead of GitHub Actions for enter
 
 ## 📄 License
 
-See LICENSE file for details.
+MIT LICENSE.
 
 ---
 
