@@ -59,14 +59,8 @@ ServiceExample-DevOps/
 │       │
 │       └── docker/
 │           ├── Dockerfile                     # Service container
-│           ├── docker-compose.yml             # Docker compose
-│           └── certs/                         # TLS certificates
-│               ├── mongodb.pem
-│               ├── nats-cert.pem
-│               ├── nats-key.pem
-│               ├── redis-cert.pem
-│               └── redis-key.pem
-│
+│           └── docker-compose.yml             # Docker compose
+│      
 ├── 📁 helm/                                  # Helm charts
 │   └── serviceexample/
 │       ├── Chart.yaml                        # Helm metadata
