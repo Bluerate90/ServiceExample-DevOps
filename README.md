@@ -1,5 +1,3 @@
-# ServiceExample-DevOps
-
 # ServiceExample - DevOps Project
 
 A complete DevOps implementation of a .NET application with MongoDB, Redis, and NATS integration. This project demonstrates containerization, CI/CD pipelines, Kubernetes deployment, GitOps, and security best practices.
@@ -26,7 +24,7 @@ A complete DevOps implementation of a .NET application with MongoDB, Redis, and 
 ServiceExample-DevOps/
 │
 ├── 📄 README.md                              # Main project overview
-├── 📄 azure-pipelines.yml                    # CI/CD pipeline
+├── 📄 azure-pipelines.yml                    # Azure CI/CD pipeline (optional)
 ├── 📄 LICENSE                                # License
 │
 ├── 📁 src/                                   # Application source
@@ -82,8 +80,7 @@ ServiceExample-DevOps/
 │       ├── serviceexample-1.0.0.tgz          # Released chart
 │       ├── serviceexample-1.0.0.tgz.prov     # GPG signature
 │       ├── serviceexample-1.0.2.tgz          # Released chart
-│       ├── serviceexample-1.0.2.tgz.prov     # GPG signature
-│       └── serviceexample.asc                # GPG key
+│       └── serviceexample-1.0.2.tgz.prov     # GPG signature
 │
 ├── 📁 k8s/                                   # Kubernetes configs
 │   └── gitops/
@@ -102,18 +99,21 @@ ServiceExample-DevOps/
 │               ├── helmrelease.yaml          # App deployment
 │               └── sealed-secret.yaml        # Encrypted secrets
 │
+├── 📁 .github/                               # GitHub Actions workflows
+│   └── workflows/
+│       ├── ci-cd.yml                         # Build, sign, publish
+│       └── helm-chart.yml                    # Chart signing & publish
+│
 ├── 📁 docs/                                  # Documentation
 │   ├── Access App - Guide.md                 # ⭐ Quick access guide
+│   ├── Security Best Practices & Implementation Guide.md
 │   ├── Local Development Setup.md            # Local running
 │   ├── Step2: CI-CD Pipeline.md              # CI/CD setup
 │   ├── Helm Chart.md                         # Packaging & publish
 │   ├── GitOps Kubernetes Deployment - Complete.md
 │   └── Multi-Node Kubernetes Cluster Setup on VMware.md
 │
-└── 📁 cosign/                                # Image signing
-    ├── cosign.key                            # Private key
-    ├── cosign.pub                            # Public key
-    └── cosign_base64.txt                     # Base64 encoded
+└── .gitignore                                # Excludes private keys & secrets
 ```
 
 ### File Legend
@@ -125,7 +125,7 @@ ServiceExample-DevOps/
 ### Key Files by Purpose
 
 **Getting Started**
-- `docs/Access App - Guide.md` - Quick access (5 min)
+- `docs/Access App - Guide.md` - Quick access guide
 - `docker/docker-compose.yml` - Local development
 
 **Deployment**
@@ -133,8 +133,9 @@ ServiceExample-DevOps/
 - `k8s/gitops/` - GitOps automation
 
 **CI/CD**
-- `azure-pipelines.yml` - Automated pipeline
-- `cosign/` - Image signing keys
+- `.github/workflows/` - GitHub Actions pipelines
+- `azure-pipelines.yml` - Azure DevOps pipeline (alternative)
+- `cosign.pub` - Public key for image verification
 
 **Security**
 - `k8s/gitops/apps/sealed-secret.yaml` - Encrypted secrets
@@ -144,7 +145,7 @@ ServiceExample-DevOps/
 
 ## 🚀 Quick Start
 
-### Local Development (5 minutes)
+### Local Development
 
 Start the application with all dependencies using Docker Compose:
 
@@ -191,7 +192,7 @@ Requires: MongoDB, Redis, NATS running separately
 ## 📦 Docker & Registry
 
 **Image Registry**: Available on public container registry
-**Image Signing**: All images signed with Cosine for verification
+**Image Signing**: All images signed with Cosign for verification
 **Multi-stage Build**: Optimized production images
 
 ### Verify Signed Image
@@ -227,13 +228,20 @@ GitOps automatically deploys updates from the repository. See **GitOps Setup** d
 
 ## 🔐 Security Features
 
-| Feature | Implementation | Location |
-|---------|-----------------|----------|
-| **Image Signing** | Cosine signatures | `cosign.key`, `*.tgz.prov` |
-| **Helm Chart Signing** | GPG signatures | `*.tgz.prov` |
-| **Secret Management** | Sealed Secrets | `k8s/gitops/apps/sealed-secret.yaml` |
-| **TLS Encryption** | Service-to-service | `src/docker/certs/` |
-| **RBAC** | Kubernetes native | Helm chart templates |
+| Feature | Implementation | Location | Status |
+|---------|-----------------|----------|--------|
+| **Image Signing** | Cosign (ECDSA) | `cosign.pub` | ✅ Secure |
+| **Helm Chart Signing** | GPG signatures | `*.tgz.prov` | ✅ Configured |
+| **Secret Management** | Sealed Secrets | `k8s/gitops/apps/sealed-secret.yaml` | ✅ Encrypted |
+| **TLS Encryption** | Service-to-service | `src/docker/certs/` | ✅ Enabled |
+| **RBAC** | Kubernetes native | Helm chart templates | ✅ Implemented |
+| **CI/CD Security** | GitHub Actions secrets | `.github/workflows/` | ✅ Best practices |
+
+**⚠️ Important**: See `docs/Security Best Practices & Implementation Guide.md` for:
+- How to properly store private keys (GitHub Secrets, not repository)
+- Why `cosign.pub` is safe to commit
+- How to implement signing in CI/CD
+- Security verification checklist
 
 ---
 
@@ -258,7 +266,7 @@ The application is exposed safely without a public IP using Cloudflare Tunnel:
 - **Private Cluster**: Runs on internal network only
 - **Zero Trust Access**: Cloudflare credentials required
 
-See **Accessing Application** documentation for setup.
+See **Access App - Guide.md** documentation for setup.
 
 ---
 
@@ -266,31 +274,40 @@ See **Accessing Application** documentation for setup.
 
 Detailed guides available in the `docs/` folder:
 
-| Document | Purpose | Time |
-|----------|---------|------|
-| **Access App - Guide.md** | 🚀 **START HERE** - Quick 5-min setup (Ubuntu 20) | 5 min |
-| **Local Development Setup.md** | Run on your machine | 10 min |
-| **Step2: CI-CD Pipeline.md** | Configure automated builds | 15 min |
-| **Helm Chart.md** | Package and publish | 15 min |
-| **GitOps Kubernetes Deployment - Complete.md** | Cluster setup & automation | 30 min |
-| **Multi-Node Kubernetes Cluster Setup on VMware.md** | Production cluster setup | 45 min |
+| Document | Purpose |
+|----------|---------|
+| **Access App - Guide.md** | 🚀 **START HERE** - Quick access guide (Ubuntu 20) |
+| **Security Best Practices & Implementation Guide.md** | 🔒 **IMPORTANT** - Secure your keys properly |
+| **Local Development Setup.md** | Run on your machine |
+| **Step2: CI-CD Pipeline.md** | Configure automated builds |
+| **Helm Chart.md** | Package and publish |
+| **GitOps Kubernetes Deployment - Complete.md** | Cluster setup & automation |
+| **Multi-Node Kubernetes Cluster Setup on VMware.md** | Production cluster setup |
 
 ---
 
 ## 🔄 CI/CD Pipeline
 
-**Trigger**: On every push to main branch
+### GitHub Actions (Recommended)
+
+**Location**: `.github/workflows/ci-cd.yml`
+
+**Triggers**: On every push to main branch and all tags
 
 **Pipeline Steps**:
 1. Run automated tests
 2. Build Docker image
-3. Sign image with Cosine
+3. Sign image with Cosign (private key from secrets)
 4. Push to container registry
-5. Update Helm chart version
-6. Sign Helm chart
-7. Publish to ArtifactHub
+5. Verify signature with public key
+6. Package and sign Helm chart
+7. Run security scans
 
-**Configuration**: `azure-pipelines.yml`
+### Azure DevOps (Optional)
+
+**Location**: `azure-pipelines.yml`
+
+Alternative CI/CD configuration. Can be used instead of GitHub Actions for enterprise environments.
 
 ---
 
@@ -299,7 +316,7 @@ Detailed guides available in the `docs/` folder:
 - [ ] Clone repository and review structure
 - [ ] Run locally with Docker Compose
 - [ ] Execute unit tests
-- [ ] Configure CI/CD pipeline
+- [ ] Configure GitHub Actions or Azure DevOps pipeline
 - [ ] Push signed Docker image to registry
 - [ ] Publish Helm chart to ArtifactHub
 - [ ] Set up Kubernetes cluster (multi-node recommended)
@@ -335,5 +352,4 @@ For detailed setup instructions, refer to the documentation in the `docs/` folde
 
 ---
 
-**Last Updated**: 2025
-**DevOps Components**: Docker, Kubernetes, Helm, FluxCD, Prometheus, Grafana, Loki, Longhorn
+**DevOps Components**: Docker, Kubernetes, Helm, FluxCD, Prometheus, Grafana, Loki, Longhorn, GitHub Actions, Azure DevOps
