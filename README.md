@@ -106,6 +106,16 @@ ServiceExample-DevOps/
 │   └── workflows/
 │       └── main.yaml                         # Build, test, sign, publish
 │
+├── 📁 docker/                                # Docker configs & TLS certs
+│   ├── Dockerfile                            # Production container
+│   ├── docker-compose.yml                    # Docker compose
+│   └── certs/                                # TLS certificates
+│       ├── mongodb.pem
+│       ├── nats-cert.pem
+│       ├── nats-key.pem
+│       ├── redis-cert.pem
+│       └── redis-key.pem
+│
 ├── 📁 scripts/                               # Automation & setup scripts
 │   ├── 01-prepare-nodes.sh                   # Prepare cluster nodes
 │   ├── 02-init-master-1.sh                   # Initialize master node
@@ -158,9 +168,9 @@ ServiceExample-DevOps/
 - `scripts/09-sign-image.sh` - Sign Docker images
 - `scripts/10-sign-helm-chart.sh` - Sign Helm charts
 
-**Security**
+**Security & Infrastructure**
+- `docker/certs/` - TLS certificates
 - `k8s/gitops/apps/sealed-secret.yaml` - Encrypted secrets
-- `src/docker/certs/` - TLS certificates
 - `scripts/08-setup-sealed-secrets.sh` - Setup sealed secrets
 
 ---
@@ -172,7 +182,7 @@ ServiceExample-DevOps/
 Start the application with all dependencies using Docker Compose:
 
 ```bash
-cd src/ServiceExample
+cd docker
 docker-compose up -d
 ```
 
@@ -196,7 +206,7 @@ dotnet test UnitTests/UnitTests.csproj
 ### Build Docker Image Locally
 
 ```bash
-cd src/ServiceExample/docker
+cd docker
 docker build -t serviceexample:latest .
 ```
 
